@@ -1,0 +1,67 @@
+Rclone Google Drive to MEGA Transfer Guide
+This guide explains how to set up and use rclone to transfer data from Google Drive (e.g., gdrive_magneto) to a folder named "Backup" in your MEGA account.
+
+Prerequisites
+Install Rclone: Download and install rclone on your system from the official website.
+Google Drive and MEGA accounts: Ensure that you have active accounts for both Google Drive and MEGA.
+Step 1: Create a Google Cloud Project and Generate OAuth Credentials
+To improve transfer speeds and avoid rate limits, you can create your own Google API credentials.
+
+Go to the Google Cloud Console.
+Create a new project by clicking on the project dropdown and selecting "New Project."
+Enable the Google Drive API by navigating to APIs & Services > Library > Google Drive API and clicking "Enable."
+Go to APIs & Services > Credentials and click Create Credentials > OAuth client ID.
+If prompted to configure the OAuth consent screen, fill in the necessary information.
+Select Desktop app as the application type.
+After creating the OAuth client, download the .json file containing your Client ID and Client Secret.
+Add yourself as a Test User in the OAuth consent screen to avoid the "Error 403: access_denied" message.
+Navigate to the OAuth consent screen settings in Google Cloud.
+Scroll down to the Test users section and add your email address.
+Step 2: Configure Rclone for Google Drive
+Open Command Prompt (Windows) or Terminal (macOS/Linux) and run:
+sh
+Copy code
+rclone config
+Follow the prompts to create a new remote:
+Choose n to create a new remote.
+Name the remote gdrive_magneto.
+Select drive (Google Drive) as the storage type.
+When prompted for a Client ID and Client Secret, use the values from the .json file you downloaded from Google Cloud.
+Proceed through the rest of the prompts and authenticate with Google by opening the URL provided by rclone.
+Step 3: Configure Rclone for MEGA
+In the Command Prompt or Terminal, run the configuration command again:
+sh
+Copy code
+rclone config
+Create another remote for MEGA:
+Choose n to create a new remote.
+Name the remote mega.
+Select mega as the storage type.
+Enter your MEGA email and password when prompted.
+Step 4: Transfer Data from Google Drive to MEGA
+Now, you can use rclone to transfer files from a specific folder in gdrive_magneto to the "Backup" folder in your MEGA account.
+
+Use the following command, replacing <FOLDER_PATH> with the folder you want to transfer:
+sh
+Copy code
+rclone copy gdrive_magneto:<FOLDER_PATH> mega:Backup --transfers=16 --checkers=16 --drive-chunk-size=64M --progress
+Example: If you want to copy a folder named "Photos" from gdrive_magneto to the "Backup" folder in MEGA:
+sh
+Copy code
+rclone copy gdrive_magneto:Photos mega:Backup --transfers=16 --checkers=16 --drive-chunk-size=64M --progress
+Command Explanation
+gdrive_magneto:<FOLDER_PATH>: The folder in Google Drive that you want to transfer.
+mega:Backup: The target folder in your MEGA account.
+--transfers=16: The number of parallel file transfers.
+--checkers=16: The number of checkers running in parallel.
+--drive-chunk-size=64M: The chunk size used by Google Drive for file uploads.
+--progress: Shows the progress of the transfer.
+Step 5: Monitoring and Verifying
+After running the command, monitor the progress in your terminal. You should see the files being copied from Google Drive to the "Backup" folder in MEGA.
+Verify that the files are in your MEGA account after the transfer completes.
+Conclusion
+By following these steps, you can successfully configure rclone and efficiently transfer large amounts of data from Google Drive to MEGA. For more advanced options or troubleshooting, refer to the official Rclone documentation.
+
+Notes:
+Security: Keep your Google API Client ID and Client Secret safe and avoid sharing them.
+Performance: You can adjust the --transfers, --checkers, and --drive-chunk-size options based on your internet connection speed and system performance
