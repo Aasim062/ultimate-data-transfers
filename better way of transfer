@@ -1,0 +1,57 @@
+#once you have implanted the g drive and mega acoounts using google api in terminal follow the following steps for better transfer
+#Split-GDriveFiles.ps1
+# Split-GDriveFiles.ps1
+# This script splits a large file containing Google Drive file paths into smaller parts for concurrent processing.
+
+# Initialize variables
+$inputFile = "gdrive_files.txt"  # Input file containing the list of file paths
+$outputBaseName = "gdrive_files_part"  # Base name for the output files
+$splitFileCount = 15  # Number of parts to split the file into
+$currentFileIndex = 1  # Index for the current output file
+$lineCounter = 0  # Counter for the number of lines written to the current output file
+
+# Get the total number of lines in the input file
+$totalLines = (Get-Content $inputFile | Measure-Object -Line).Lines
+
+# Calculate how many lines to write per split file
+$linesPerFile = [math]::Ceiling($totalLines / $splitFileCount)
+
+# Create a StreamReader for large file processing
+$reader = [System.IO.StreamReader]::new($inputFile)
+
+# Open a writer for the first split file
+$writer = [System.IO.StreamWriter]::new("${outputBaseName}$currentFileIndex.txt")
+
+# Read through the input file line by line
+while ($reader.Peek() -ge 0) {
+    $line = $reader.ReadLine()  # Read the next line
+    $writer.WriteLine($line)  # Write the line to the current output file
+    $lineCounter++  # Increment the line counter
+
+    # If the current file reaches the required line count, move to the next file
+    if ($lineCounter -ge $linesPerFile) {
+        $writer.Close()  # Close the current output file
+        $currentFileIndex++  # Increment the output file index
+        if ($currentFileIndex -le $splitFileCount) {
+            $writer = [System.IO.StreamWriter]::new("${outputBaseName}$currentFileIndex.txt")  # Open a new output file
+        }
+        $lineCounter = 0  # Reset the line counter
+    }
+}
+
+# Close the last writer if it exists
+if ($writer -ne $null) {
+    $writer.Close()
+}
+
+# Clean up the reader
+$reader.Close()
+
+# End of script
+
+
+
+####using this script you will get the texxt filles in the r clone folder you created now in that folder open the command prompt and enter the following command
+rclone copy gdrive_magneto: --files-from=gdrive_files_part1.txt mega:Backup --transfers=16 --checkers=16 --progress
+this command will help in the data transfer acoording to the divided data .
+run the number of terminal acoording to the number you have divided the data (in this case it is 15) //remember to change the text file number
